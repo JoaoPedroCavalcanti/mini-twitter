@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from django.contrib.auth import get_user_model
 from rest_framework.validators import ValidationError
+from utils.utils_functions import hasAtLeast8Characters, hasSpecialCharacter, hasUpperCase
 
 class UserSerializer(ModelSerializer):
     
@@ -31,3 +32,20 @@ class UserSerializer(ModelSerializer):
             raise ValidationError('The provided email is already registered. Please choose another one.')
 
         return email  
+    
+    def validate_password(self, password):
+        errors_list = []
+
+        if not hasUpperCase(password):
+            errors_list.append("Password must contain at least one uppercase letter.")
+        
+        if not hasAtLeast8Characters(password):
+            errors_list.append("Password must be at least 8 characters long.")
+            
+        if not hasSpecialCharacter(password):
+            errors_list.append("Password must have at least 1 special character(ex: !$%*<).")
+
+        if errors_list:
+            raise ValidationError(errors_list)
+
+        return password

@@ -1,8 +1,10 @@
-from users.serializers import UserSerializer
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
+
 from users.permissions import CanCreate
+from users.serializers import UserSerializer
+
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
@@ -12,7 +14,7 @@ class UserViewSet(ModelViewSet):
     def get_queryset(self):
         User = get_user_model()
         
-        if self.request.user.is_staff:
+        if self.request.user.is_staff: # type: ignore
             return User.objects.all()
         
         return User.objects.filter(pk=self.request.user.pk)
