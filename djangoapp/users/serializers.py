@@ -1,26 +1,45 @@
-from rest_framework.serializers import ModelSerializer
 from django.contrib.auth import get_user_model
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from rest_framework.validators import ValidationError
-from utils.utils_functions import hasAtLeast8Characters, hasSpecialCharacter, hasUpperCase
+from utils.utils_functions import (
+    hasAtLeast8Characters,
+    hasSpecialCharacter,
+    hasUpperCase,
+)
+
+from users.models import Profile
+
+
+class ProfileSerializer(ModelSerializer):
+    following = PrimaryKeyRelatedField(many=True, read_only=True)
+    followers = PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['user', 'following', 'followers']
+        read_only_fields = ['user']
+
+
+User = get_user_model()
 
 class UserSerializer(ModelSerializer):
-    
+    profile = ProfileSerializer(read_only=True)  # Mude para read_only
+
     class Meta:
-        model = get_user_model()
-        fields = ['id', 'username', 'email', 'password']
-        read_only = ['id']
+        model = User
+        fields = ['id', 'username', 'email', 'password', 'profile']
+        read_only = ['id', 'profile']  # Mantenha o profile como read_only
         extra_kwargs = {
-            'username': {'required': True},
             'password': {'write_only': True, 'required': True},
-            'email': {'required': True},
+            'email': {'required': True}
         }
-        
+
     def create(self, validated_data):
         User = get_user_model()
         
         user = User.objects.create_user(
             username=validated_data.get('username'),
-            email=validated_data.get('email'),  # Certifique-se de que o e-mail está sendo atribuído
+            email=validated_data.get('email'),
             password=validated_data.get('password'),
         )
         return user

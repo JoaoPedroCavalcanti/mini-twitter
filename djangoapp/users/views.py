@@ -1,5 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.validators import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from users.permissions import CanCreate
@@ -8,18 +13,70 @@ from users.serializers import UserSerializer
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
-    http_method_names = ['get', 'post', 'delete', 'patch']
-    permission_classes = [IsAuthenticated, ]
-    
+    http_method_names = ["get", "post", "delete", "patch"]
+    permission_classes = [
+        IsAuthenticated,
+    ]
+
     def get_queryset(self):
         User = get_user_model()
-        
-        if self.request.user.is_staff: # type: ignore
+
+        if self.request.user.is_staff or self.request.method == "GET":  # type: ignore
             return User.objects.all()
-        
+
         return User.objects.filter(pk=self.request.user.pk)
-    
+
     def get_permissions(self):
-        if self.request.method == 'POST':
+        if self.request.method == "POST":
             return [CanCreate()]
         return super().get_permissions()
+
+
+    @action(
+        methods=['get'],
+        detail=False,
+        url_path='follow/(?P<id_user_to_follow>[^/.]+)'
+    )
+    def follow(self, request, *args, **kwargs):
+        User = get_user_model()
+        
+        user_following = request.user
+        
+        id_user_to_follow = kwargs.get('id_user_to_follow')
+        user_to_follow = get_object_or_404(User, id = id_user_to_follow)
+
+        # User can not follow who his already follow
+        if user_following.profile.following.filter(pk=user_to_follow.profile.pk).exists(): # type: ignore
+            raise ValidationError({'detail': 'You are already following this user.'})
+        
+        # User can not follow itself
+        if user_following == user_to_follow:
+            raise ValidationError({'detail': 'You can not follow yourself.'})
+        
+        # User can`t follow an admin user
+        if user_to_follow.is_staff:
+            raise ValidationError({'detail': 'You can not follow this user.'})
+        
+        user_following.profile.following.add(user_to_follow.profile) # type: ignore
+        user_to_follow.profile.followers.add(user_following.profile) # type: ignore
+        return Response({'detail': 'Successfully followed the user.'}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        methods=['get'],
+        detail=False,
+        url_path='unfollow/(?P<id_user_to_unfollow>[^/.]+)'
+    )
+    def unfollow(self, request, *args, **kwargs):
+        User = get_user_model()
+        
+        user_unfollowing = request.user
+        
+        id_user_to_unfollow = kwargs.get('id_user_to_unfollow')
+        user_to_unfollow = get_object_or_404(User, id = id_user_to_unfollow)
+
+        if user_unfollowing.profile.following.filter(pk=user_to_unfollow.profile.pk).exists(): # type: ignore
+            user_unfollowing.profile.following.remove(user_to_unfollow.profile) # type: ignore
+            user_to_unfollow.profile.followers.remove(user_unfollowing.profile) # type: ignore
+            return Response({'detail': 'Successfully unfollowed the user.'}, status=status.HTTP_204_NO_CONTENT)
+        raise ValidationError({'detail': 'You are not following this user.'})
+        
