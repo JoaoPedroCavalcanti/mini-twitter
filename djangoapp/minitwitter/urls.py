@@ -16,6 +16,10 @@ urlpatterns = [
             include('users.urls')
         ),
     
+    path('post/',
+            include('posts.urls')
+        ),
+    
     path('token/', 
            TokenObtainPairView.as_view(), 
            name='token_obtain_pair'
