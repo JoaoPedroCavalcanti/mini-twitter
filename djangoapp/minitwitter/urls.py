@@ -19,6 +19,10 @@ urlpatterns = [
     path('post/',
             include('posts.urls')
         ),
+
+    path('feed/',
+            include('feed.urls')
+        ),
     
     path('token/', 
            TokenObtainPairView.as_view(), 

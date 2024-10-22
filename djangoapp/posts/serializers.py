@@ -25,3 +25,4 @@ class PostSerializer(ModelSerializer):
     def validate(self, attrs):
         attrs['poster_user'] = self.user
         return super().validate(attrs)
+    
