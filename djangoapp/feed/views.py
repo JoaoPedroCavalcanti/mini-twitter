@@ -11,6 +11,8 @@ class FeedView(ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
+    http_method_names = ["get"]
+    
 
     def get_queryset(self):
         user = self.request.user
