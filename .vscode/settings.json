@@ -22,9 +22,9 @@
       "editor.insertSpaces": true,
       "editor.formatOnSave": true,
       "editor.codeActionsOnSave": {
-        "source.fixAll": true,
-        "source.fixAll.unusedImports": true,
-        "source.organizeImports": true
+        "source.fixAll": "explicit",
+        "source.fixAll.unusedImports": "explicit",
+        "source.organizeImports": "explicit"
       }
     },
     "python.languageServer": "Pylance",
@@ -39,6 +39,7 @@
     "python.linting.flake8Enabled": true,
     "python.linting.mypyEnabled": true,
     "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [], // -x to bail
     "python.testing.pytestEnabled": true,
     "python.analysis.diagnosticSeverityOverrides": {
       "reportUnknownMemberType": "none",

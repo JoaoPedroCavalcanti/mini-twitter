@@ -84,14 +84,19 @@ WSGI_APPLICATION = 'minitwitter.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'change-me'),
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('POSTGRES_DB', 'change-me'),
         'USER': os.getenv('POSTGRES_USER', 'change-me'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'change-me'),
-        'HOST': os.getenv('POSTGRES_HOST', 'change-me'),
-        'PORT': os.getenv('POSTGRES_PORT', 'change-me'),
+        'HOST': os.getenv('POSTGRES_HOST', 'psql'),  
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'TEST': {
+            'NAME': 'test_' + os.getenv('POSTGRES_DB', 'change-me') 
+        }
     }
 }
+
+
 
 
 
@@ -117,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'America/Sao_Paulo'
 

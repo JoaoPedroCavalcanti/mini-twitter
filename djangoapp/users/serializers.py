@@ -52,6 +52,15 @@ class UserSerializer(ModelSerializer):
 
         return email  
     
+    def validate_username(self, username):
+        User = get_user_model()
+        
+        if User.objects.filter(username=username).exists():
+            raise ValidationError('The provided username is already registered. Please choose another one.')
+
+        return username  
+        
+    
     def validate_password(self, password):
         errors_list = []
 
