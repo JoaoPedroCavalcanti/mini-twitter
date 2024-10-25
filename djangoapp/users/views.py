@@ -61,7 +61,7 @@ class UserViewSet(ModelViewSet):
         if user_following == user_to_follow:
             raise ValidationError({"detail": "You can not follow yourself."})
 
-        # User can`t follow an admin user
+        # User can not follow an admin user
         if user_to_follow.is_staff:
             raise ValidationError({"detail": "You can not follow this user."})
 

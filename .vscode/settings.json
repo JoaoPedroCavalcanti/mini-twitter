@@ -17,7 +17,7 @@
     "terminal.integrated.fontFamily": "",
     "editor.fontLigatures": false,
     "[python]": {
-      "editor.defaultFormatter": "ms-python.autopep8",
+      "editor.defaultFormatter": "charliermarsh.ruff",
       "editor.tabSize": 4,
       "editor.insertSpaces": true,
       "editor.formatOnSave": true,
@@ -51,5 +51,7 @@
     "python.defaultInterpreterPath": "./venv/bin/python",
     "python.analysis.typeCheckingMode": "basic",
     "cSpell.enabled": true,
-    "python.formatting.provider": "none"
+    "python.formatting.provider": "none",
+
   }
+
