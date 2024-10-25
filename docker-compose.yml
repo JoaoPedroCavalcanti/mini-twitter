@@ -1,3 +1,5 @@
+version: '3.8'  # Se não estiver especificado, é bom adicionar a versão do compose.
+
 services:
   djangoapp:
     container_name: djangoapp
@@ -25,7 +27,7 @@ services:
   test:
     build:
       context: .
-    command: ["pytest"]
+    command: ["coverage", "run", "-m", "pytest"] # Use o caminho completo do coverage
     environment:
       - DJANGO_SETTINGS_MODULE=minitwitter.settings
       - TESTING=1
@@ -37,4 +39,4 @@ services:
     depends_on:
       - psql
     profiles: 
-      - test 
+      - test
