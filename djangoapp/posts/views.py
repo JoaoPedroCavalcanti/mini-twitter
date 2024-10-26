@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
@@ -27,12 +28,33 @@ class PostViewSet(ModelViewSet):
             return PostModel.objects.filter(poster_user=self.request.user.id)  # type: ignore
         return super().get_queryset()
 
+    def check_post_permissions(self, post):
+        if self.request.user.id != post.poster_user.id:  # type: ignore
+            raise PermissionDenied("You do not have permission to perform this action.")
+
+    def retrieve(self, request, *args, **kwargs):
+        post = get_object_or_404(PostModel, pk=kwargs.get("pk"))
+        self.check_post_permissions(post)
+        serializer = self.get_serializer(post)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        post = get_object_or_404(PostModel, pk=kwargs.get("pk"))
+        self.check_post_permissions(post)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        post = get_object_or_404(PostModel, pk=kwargs.get("pk"))
+        self.check_post_permissions(post)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(methods=["POST"], detail=False, url_path="like")
     def like_post(self, request, *args, **kwargs):
         post_id = request.data.get("post_id")
 
         if not post_id:
-            raise ValidationError({"error": "Post ID(post_id) is required."})
+            raise ValidationError({"detail": "Post ID(post_id) is required."})
 
         post = get_object_or_404(PostModel, pk=post_id)
 
@@ -50,7 +72,7 @@ class PostViewSet(ModelViewSet):
         post_id = request.data.get("post_id")
 
         if not post_id:
-            raise ValidationError({"error": "Post ID(post_id) is required."})
+            raise ValidationError({"detail": "Post ID(post_id) is required."})
 
         post = get_object_or_404(PostModel, pk=post_id)
 
