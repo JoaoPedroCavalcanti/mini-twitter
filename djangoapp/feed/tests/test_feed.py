@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from minitwitter.settings import REST_FRAMEWORK
 from rest_framework.routers import reverse
 from tests_base.base_test import BaseTest
 
@@ -136,3 +137,32 @@ class TestsFeed(BaseTest):
 
         # Test if is in cronological order
         self.assertEqual(most_recent, datetimes[0])
+
+    def test_feed_pagination_returns_correct_number_of_posts_per_page(self):
+        # Creating users
+        user_a = self.create_user(
+            username="user_a", email="user_a@email.com", password="Abcd123!"
+        )
+        user_b = self.create_user(
+            username="user_b", email="user_b@email.com", password="Abcd123!"
+        )
+
+        # user_a token
+        token_user_a = self.create_token(user_a)
+
+        # Creating posts from user_b
+        for i in range(20):
+            self.create_post(user_b, content=f"Post number: {i}")
+
+        # user_a following user_b
+        self.follow(user_a, user_b)
+
+        # Getting numbers of pages (from settings)
+        nums_of_page = REST_FRAMEWORK.get("PAGE_SIZE")
+
+        response = self.client.get(
+            f"{reverse('feed:user-feed')}?page=1",
+            HTTP_AUTHORIZATION=f"Bearer {token_user_a}",
+        )
+
+        self.assertEqual(nums_of_page, len(response.data.get("results")))  # type: ignore
