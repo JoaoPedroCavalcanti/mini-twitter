@@ -2,7 +2,6 @@ from django.urls import path
 
 from feed.views import FeedView
 
-urlpatterns = [
-    path('', FeedView.as_view(), name='user-feed')
-]
+app_name = "feed"
 
+urlpatterns = [path("", FeedView.as_view(), name="user-feed")]
