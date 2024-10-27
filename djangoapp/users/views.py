@@ -8,7 +8,7 @@ from rest_framework.validators import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from users.permissions import CanCreate
-from users.serializers import UserSerializer
+from users.serializers import FollowSerializer, UnfollowSerializer, UserSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -17,6 +17,13 @@ class UserViewSet(ModelViewSet):
     permission_classes = [
         IsAuthenticated,
     ]
+
+    def get_serializer_class(self):
+        if self.action == "follow":
+            return FollowSerializer
+        if self.action == "unfollow":
+            return UnfollowSerializer
+        return UserSerializer
 
     def get_queryset(self):
         User = get_user_model()

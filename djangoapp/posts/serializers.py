@@ -1,28 +1,45 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 from posts.models import PostModel
 
 
-class PostSerializer(ModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostModel
-        fields = ['id', 'poster_user', 'text_content', 'image', 'likes_counter','liked_by', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
-        extra_kwargs = {
-            'poster_user': {'required': False},
-            'text_content': {'required': True},
-            'image': {'required': False},
-            'likes_counter': {'required': False},
-            'liked_by': {'required': False},
-            }
-        
-    # Recieve the user from the view
+        fields = [
+            "id",
+            "poster_user",
+            "text_content",
+            "image",
+            "likes_counter",
+            "liked_by",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "poster_user",
+            "likes_counter",
+            "liked_by",
+        ]
+
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)  
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
-    # Adding the user to poster_user automattically
-    def validate(self, attrs):
-        attrs['poster_user'] = self.user
-        return super().validate(attrs)
-    
+    # Define valores automaticamente ao criar o post
+    def create(self, validated_data):
+        validated_data["poster_user"] = self.user
+        validated_data["likes_counter"] = 0
+        validated_data["liked_by"] = []
+        return super().create(validated_data)
+
+
+class LikeSerializer(serializers.Serializer):
+    post_id = serializers.IntegerField()
+
+
+class DislikeSerializer(serializers.Serializer):
+    post_id = serializers.IntegerField()

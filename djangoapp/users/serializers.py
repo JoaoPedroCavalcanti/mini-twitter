@@ -1,5 +1,10 @@
 from django.contrib.auth import get_user_model
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework import serializers
+from rest_framework.serializers import (
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+    Serializer,
+)
 from rest_framework.validators import ValidationError
 from utils.utils_functions import (
     hasAtLeast8Characters,
@@ -24,12 +29,12 @@ User = get_user_model()
 
 
 class UserSerializer(ModelSerializer):
-    profile = ProfileSerializer(read_only=True)  # Mude para read_only
+    profile = ProfileSerializer(read_only=True)
 
     class Meta:
         model = User
         fields = ["id", "username", "email", "password", "profile"]
-        read_only = ["id", "profile"]  # Mantenha o profile como read_only
+        read_only = ["id", "profile"]
         extra_kwargs = {
             "password": {"write_only": True, "required": True},
             "email": {"required": True},
@@ -83,3 +88,11 @@ class UserSerializer(ModelSerializer):
             raise ValidationError(errors_list)
 
         return password
+
+
+class FollowSerializer(Serializer):
+    id_user_to_follow = serializers.IntegerField()
+
+
+class UnfollowSerializer(Serializer):
+    id_user_to_unfollow = serializers.IntegerField()
