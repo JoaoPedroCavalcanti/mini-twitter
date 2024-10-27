@@ -1,25 +1,13 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken
-from users.serializers import UserSerializer
+from tests_base.base_test import BaseTest
 
 
-class userAuthenticationTests(TestCase):
+class UserAuthenticationTests(BaseTest):
     def setUp(self):
-        self.User = get_user_model()
+        super().setUp()
 
-        self.user = self.User.objects.create(
-            username="authenticated_user",
-            email="authenticated@email.com",
-            password="Abcd123!",
-        )
-
-        self.access_token = AccessToken.for_user(self.user)
-
-    def test_create_user_status_201_with_valid_data(
-        self,
-    ):
+    def test_create_user_status_201_with_valid_data(self):
         user_data = {
             "username": "johndoe",
             "email": "johndoe@email.com",
@@ -30,28 +18,20 @@ class userAuthenticationTests(TestCase):
         self.assertEqual(201, response.status_code)
 
     def test_create_user_status_400_when_username_already_exists(self):
-        self.User.objects.create_user(
-            username="johndoe2", email="existing@email.com", password="Abcd123!"
-        )
-
+        # Creating user_data with same name as self.user_a from BaseTest
         user_data = {
-            "username": "johndoe2",
+            "username": "base_user_a",
             "email": "anotheremail@email.com",
             "password": "Abcd123!",
         }
-
         response = self.client.post(reverse("users:users-api-list"), data=user_data)
-
         self.assertEqual(400, response.status_code)
 
     def test_create_user_status_400_when_email_already_exists(self):
-        self.User.objects.create_user(
-            username="johndoe2", email="existing@email.com", password="Abcd123!"
-        )
-
+        # Creating user_data with same name as self.user_a from BaseTest
         user_data = {
             "username": "johndoe3",
-            "email": "existing@email.com",
+            "email": "base_user_a@email.com",
             "password": "Abcd123!",
         }
 
@@ -60,25 +40,17 @@ class userAuthenticationTests(TestCase):
         self.assertEqual(400, response.status_code)
 
     def test_create_user_status_400_when_password_does_not_meet_requirements(self):
-        # passing a right password
-        user_data_with_right_password = {
-            "username": "johndoe",
-            "email": "johndsdoe@email.com",
-            "password": "Abcd123!",
-        }
-
-        serializer = UserSerializer(data=user_data_with_right_password)
-        self.assertTrue(serializer.is_valid())
-
-        # passing a right password
         user_data_with_wrong_password = {
             "username": "johndoe",
             "email": "johndsdoe@email.com",
             "password": "abc",
         }
 
-        serializer = UserSerializer(data=user_data_with_wrong_password)
-        self.assertFalse(serializer.is_valid())
+        response = self.client.post(
+            reverse("users:users-api-list"), data=user_data_with_wrong_password
+        )
+
+        self.assertEqual(400, response.status_code)
 
     def test_create_user_status_400_when_email_format_is_invalid(self):
         user = {
@@ -92,27 +64,31 @@ class userAuthenticationTests(TestCase):
         self.assertEqual(400, response.status_code)
 
     def test_retrieve_user_details_successfully(self):
+        # Using user_a created by BaseTest
         response = self.client.get(
-            reverse("users:users-api-detail", args=[self.user.id]),  # type: ignore
-            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            reverse("users:users-api-detail", args=[self.user_a.id]),  # type: ignore
+            HTTP_AUTHORIZATION=f"Bearer {self.token_user_a}",
         )
 
         self.assertEqual(200, response.status_code)
 
     def test_update_user_details_successfully(self):
-        user_to_change = self.User.objects.create(
-            username="change",
-            email="change@email.com",
-            password="Change123!",
+        # Creating user
+        user_to_change = self.create_user(
+            username="change", email="change@email.com", password="Change123!"
         )
 
-        access_token = AccessToken.for_user(user_to_change)
+        # Creating access token
+        access_token = self.create_token(user_to_change)
 
+        # Dict with new data
         new_username_email_and_password = {
             "username": "caca",
             "email": "caca@email.com",
             "password": "ABCD123!",
         }
+
+        # Accessing the endpoint and passing the dict with new data
         response = self.client.patch(
             reverse("users:users-api-detail", args=[user_to_change.id]),  # type: ignore
             data=new_username_email_and_password,
@@ -122,12 +98,15 @@ class userAuthenticationTests(TestCase):
         self.assertEqual(200, response.status_code)
 
     def test_delete_user_status_204_and_user_is_removed(self):
-        user = self.User.objects.create(
+        # Creating user to delete
+        user = self.create_user(
             username="delete_me", email="deleteme@email.com", password="Abcd123!"
         )
 
-        access_token = AccessToken.for_user(user)
+        # Geting the access token
+        access_token = self.create_token(user)
 
+        # Deleting the user using endpoint
         response = self.client.delete(
             reverse("users:users-api-detail", args=[user.id]),  # type: ignore
             HTTP_AUTHORIZATION=f"Bearer {access_token}",
@@ -136,36 +115,25 @@ class userAuthenticationTests(TestCase):
         self.assertEqual(204, response.status_code)
 
 
-class userFollowTests(TestCase):
+class UserFollowTests(BaseTest):
     def setUp(self):
-        self.User = get_user_model()
-
-        self.user = self.User.objects.create(
-            username="authenticated_user",
-            email="authenticated@email.com",
-            password="Abcd123!",
-        )
-        self.user_access_token = AccessToken.for_user(self.user)
-
-        self.admin_user = self.User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
-            password="Admin123!",
-        )
-        self.admin_access_token = AccessToken.for_user(self.admin_user)
+        super().setUp()
 
     def test_user_can_follow_another_user_successfully(self):
-        user = self.User.objects.create(
+        # Creating user
+        user = self.create_user(
             username="user", email="user@email.com", password="Abcd123!"
         )
 
+        # Creating access token
         user_access_token = AccessToken.for_user(user)
 
+        # Creating another_user
         another_user = self.User.objects.create(
             username="another_user", email="anotheruser@email.com", password="Abcd123!"
         )
 
-        # user => following => another_user
+        # Making user follow another_user
         response = self.client.post(
             reverse("users:users-api-follow"),
             data={"id_user_to_follow": another_user.id},  # type: ignore
@@ -174,21 +142,23 @@ class userFollowTests(TestCase):
         self.assertEqual(204, response.status_code)
 
     def test_user_can_unfollow_another_user_successfully(self):
-        user = self.User.objects.create(
+        # Creating user
+        user = self.create_user(
             username="user", email="user@email.com", password="Abcd123!"
         )
 
-        user_access_token = AccessToken.for_user(user)
+        # Creating access token
+        user_access_token = self.create_token(user)
 
-        another_user = self.User.objects.create(
+        # Creating another_user
+        another_user = self.create_user(
             username="another_user", email="anotheruser@email.com", password="Abcd123!"
         )
 
-        # user => following => another_user (without using the endpoint)
-        user.profile.following.add(another_user.profile)  # type: ignore
-        another_user.profile.followers.add(user.profile)  # type: ignore
+        # Making user follow another_user
+        self.follow(user_following=user, user_to_follow=another_user)
 
-        # user => unfollowing => another_user
+        # Making user unfollow another_user
         response = self.client.post(
             reverse("users:users-api-unfollow"),
             data={"id_user_to_unfollow": another_user.id},  # type: ignore
@@ -197,38 +167,54 @@ class userFollowTests(TestCase):
         self.assertEqual(204, response.status_code)
 
     def test_following_self_status_400(self):
+        # Creating user
+        user = self.create_user(
+            username="user", email="user@email.com", password="Abcd123!"
+        )
+
+        # Creating Acess token
+        user_access_token = self.create_token(user)
+
         response = self.client.post(
             reverse("users:users-api-follow"),
-            data={"id_user_to_follow": self.user.id},  # type: ignore
-            HTTP_AUTHORIZATION=f"Bearer {self.user_access_token}",
+            data={"id_user_to_follow": user.id},  # type: ignore
+            HTTP_AUTHORIZATION=f"Bearer {user_access_token}",
         )
         self.assertEqual(400, response.status_code)
 
     def test_following_admin_user_status_400(self):
+        # Creating super user
+        super_user = self.create_super_user(
+            username="super_user", email="super_user@email.com", password="Abcd123!"
+        )
+
+        # Access endpoint as user_a (created in BaseTest)
         response = self.client.post(
             reverse("users:users-api-follow"),
-            data={"id_user_to_follow": self.admin_user.id},  # type: ignore
-            HTTP_AUTHORIZATION=f"Bearer {self.user_access_token}",
+            data={"id_user_to_follow": super_user.id},  # type: ignore
+            HTTP_AUTHORIZATION=f"Bearer {self.token_user_a}",
         )
 
         self.assertEqual(400, response.status_code)
 
     def test_following_already_followed_user_status_400(self):
-        user = self.User.objects.create(
+        # Creating user
+        user = self.create_user(
             username="user", email="user@email.com", password="Abcd123!"
         )
 
-        user_access_token = AccessToken.for_user(user)
+        # Creating Acess token
+        user_access_token = self.create_token(user)
 
+        # Creating another_user
         another_user = self.User.objects.create(
             username="another_user", email="anotheruser@email.com", password="Abcd123!"
         )
 
-        # user => following => another_user (without using the endpoint)
-        user.profile.following.add(another_user.profile)  # type: ignore
-        another_user.profile.followers.add(user.profile)  # type: ignore
+        # Making user follow another_user
+        self.follow(user_following=user, user_to_follow=another_user)
 
-        # user => try following again
+        # User trying to follow another_user, again
         response = self.client.post(
             reverse("users:users-api-follow"),
             data={"id_user_to_follow": another_user.id},  # type: ignore

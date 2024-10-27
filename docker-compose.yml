@@ -27,7 +27,7 @@ services:
   test:
     build:
       context: .
-    command: ["coverage", "run", "-m", "pytest"] # Use o caminho completo do coverage
+    command: ["sh", "-c", "pytest -s && coverage report"] 
     environment:
       - DJANGO_SETTINGS_MODULE=minitwitter.settings
       - TESTING=1
