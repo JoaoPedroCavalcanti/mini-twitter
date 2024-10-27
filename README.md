@@ -14,7 +14,6 @@ Once you have created a user, you can obtain a token by accessing the "create to
 
 To authorize requests in Swagger, click the "Authorize" button and enter the access token as follows:
 
-
 ## API Endpoints
 
 ### User Management
@@ -66,3 +65,68 @@ As a user, you can create, list, detail, update, and delete your posts.
 You can find the full API documentation at the following URL:
 
 **API Documentation**: [Swagger UI](http://127.0.0.1:8000/swagger/)
+
+
+## How to Run the Project
+To run Mini-Twitter using Docker, follow the steps below:
+
+### Prerequisites
+
+Make sure you have [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/) installed on your machine.
+
+### Instructions
+
+1. **Clone the repository:**
+      ```bash
+      git clone <REPOSITORY_URL>
+          cd mini-twitter
+      ```
+  
+2. **Build and start the containers:**
+      ```bash
+         docker-compose up --build
+      ```
+      
+3. **Access the Django container:**
+      ```bash
+       docker exec -it djangoapp /bin/bash
+
+    
+4. **Migrate the database:**
+      ```bash
+      python manage.py migrate
+      ```
+  
+5. **Create a superuser (optional, to access the admin panel):**
+      ```bash
+      python manage.py createsuperuser
+      ```
+    
+6. **Access the API:**
+  Open your browser and go to [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/) to access the API documentation.
+  
+  ### Running Tests
+  
+  To run the project's tests, you can use the test service defined in your `docker-compose.yml` file. Run the following command:
+  
+      
+  ```bash
+  docker-compose run test
+  ```
+      
+  
+  ### Test Coverage
+  
+  To generate a test coverage report, you can utilize the `coverage` tool included in your setup. It will run automatically when you execute the test service. The coverage report will be displayed in the terminal.
+  
+  
+  To view the HTML coverage report, navigate to the `htmlcov` directory generated after the tests have run. Open `index.html` in a browser to view the detailed report.
+  
+  ### Stopping the Containers
+  
+  To stop the containers, run:
+      ```bash
+      docker-compose down
+      ```
+
+
