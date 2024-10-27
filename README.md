@@ -78,7 +78,7 @@ Make sure you have [Docker](https://www.docker.com/get-started) and [Docker Comp
 
 1. **Clone the repository:**
       ```bash
-      git clone <REPOSITORY_URL>
+      git clone https://github.com/JoaoPedroCavalcanti/mini-twitter/edit/main/README.md
           cd mini-twitter
       ```
   
