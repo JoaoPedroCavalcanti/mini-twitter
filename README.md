@@ -87,23 +87,7 @@ Make sure you have [Docker](https://www.docker.com/get-started) and [Docker Comp
          docker-compose up --build
       ```
       
-3. **Access the Django container:**
-      ```bash
-       docker exec -it djangoapp /bin/bash
 
-    
-4. **Migrate the database:**
-      ```bash
-      python manage.py migrate
-      ```
-  
-5. **Create a superuser (optional, to access the admin panel):**
-      ```bash
-      python manage.py createsuperuser
-      ```
-    
-6. **Access the API:**
-  Open your browser and go to [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/) to access the API documentation.
   
   ### Running Tests
   
