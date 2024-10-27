@@ -40,3 +40,5 @@ services:
       - psql
     profiles: 
       - test
+    # Adiciona um comando para instalar os requisitos
+    entrypoint: ["sh", "-c", "pip install -r /djangoapp/requirements.txt && coverage run -m pytest"]
