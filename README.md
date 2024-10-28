@@ -2,6 +2,21 @@
 
 **Mini-Twitter** is a simplified social platform where users can post messages, follow others, and interact through likes and comments, demonstrating core web development skills.
 
+## System Design Diagrams
+
+### ERD Database Diagram
+
+This diagram shows the database structure for Mini-Twitter, highlighting the tables and relationships among them.
+
+![ERD Database Diagram](./diagrams/ERD.png)
+
+### Architecture Diagram
+
+This architecture diagram explains the system design of Mini-Twitter, outlining how the different components interact.
+
+![Architecture Diagram](./diagrams/system_design.png)
+
+
 ## Authentication
 
 To use the API, you need to create a user account with the following requirements:
